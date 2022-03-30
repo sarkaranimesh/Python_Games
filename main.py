@@ -1,68 +1,56 @@
-from snake import Snake
-from turtle import  Screen
-from food import Food
-from scoreboard import ScoreBoard
-import time
+import turtle
+import pandas
+from write_state import WriteState
+correct_guess = 0
+number_of_states= 50
 
-screen = Screen()
-screen.setup(width = 600, height =600)
-screen.bgcolor("black")
-screen.title("My snake game")
-screen.tracer(0)
+answer_write = WriteState()
+screen = turtle.Screen()
+screen.title(f" U.S States Game {correct_guess} / {number_of_states}")
+img = "blank_states_img.gif"
+screen.addshape(img)
+turtle.shape(img)
+data =pandas.read_csv("50_states.csv")
+states = data["state"].to_list()
 
-snake = Snake()
-food = Food()
-score = ScoreBoard()
-game_is_on = True
+# coordinates = data[data.state == "Ohio"]
+# x_cor = int(coordinates.x)
+#
+# print(x_cor)
 
+# print(answer_state)
+correct_guess = 0
+number_of_states= 50
+states_covered = []
+while correct_guess <=50:
+    answer_state = screen.textinput(title=f"Guess the state {correct_guess} / {number_of_states}" , prompt=" what's another state's name?")
+    answer_state = answer_state.title()
 
-screen.listen()
-screen.onkey(snake.up,"Up")
-screen.onkey(snake.down,"Down")
-screen.onkey(snake.left,"Left")
-screen.onkey(snake.right,"Right")
+    if answer_state == "Exit":
+        states_to_learn = []
+        for ii in range(0, len(states)):
+            if states[ii] not in states_covered:
+                states_to_learn.append(states[ii])
+        print(f"States to learn : \n {states_to_learn}")
+        # data_1 = pandas.DataFrame(states_to_learn)
+        # data_1.to_csv("states_to_learn.csv")
+        break
 
-while game_is_on ==True:
-    screen.update()
-    time.sleep(0.1)
+    if answer_state in states:
+        coordinates = data[data.state == answer_state]
+        x_cor = int(coordinates.x)
+        y_cor = int(coordinates.y)
+        answer_write.write_name(x_cor,y_cor,answer_state)
+        if answer_state in states_covered:
+            pass
+        else:
+            states_covered.append(answer_state)
+            correct_guess +=1
+        pass
 
-    snake.move()
-#todo: collison with food
-    if snake.head.distance(food) < 15:
-        print("no nom nom")
-        food.refresh()
-        snake.extend()
-        score.calculate_score()
-# detect collision with wall
-    if snake.head.xcor() > 280 or snake.head.xcor() < -280 or snake.head.ycor() > 280 or snake.head.ycor() < -280:
-        score.game_over()
-        game_is_on = False
-    # detect collision with tail
-    for segment in snake.segments[1:len(snake.segments)-1]:
-        if snake.head.distance(segment) < 10:
-            game_is_on = False
-            score.game_over()
-    # for segment in snake.segments:
-    #     if segment == snake.head:
-    #         pass
-    #     elif snake.head.distance(segment) < 10:
-    #         game_is_on = False
-    #         score.game_over()
-
-
-
-
-        # game_is_on= False
-
-
-
-
-
-
-
-
-
-
-
-
-screen.exitonclick()
+states_to_learn = []
+for ii in range(0,len(states)):
+    if states[ii] not in states_covered:
+        states_to_learn.append(states[ii])
+data_1 = pandas.DataFrame(states_to_learn)
+data_1.to_csv("states_to_learn.csv")
